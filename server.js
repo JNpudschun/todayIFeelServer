@@ -1,6 +1,5 @@
 const express = require('express')
 const mongoose = require("mongoose");
-const user = require("./model/userModel")
 const config = require("dotenv")
 config.config();
 const Article = require("./model/articlesModel")
@@ -8,51 +7,72 @@ const Tag = require("./model/tagModel")
 const app = express()
 const PORT = process.env.PORT || 3010;
 const cors = require('cors');
-
+app.use(express.json())
 app.use(cors());
 const mongoDB = process.env.DB_CONNECT;
 mongoose.connect(mongoDB);
 
-app.get('/',(req,res)=>{
+app.get('/',(req,res) => {
     res.send("Server is running and listening to requests.")
 })
-app.post("/",(req,res)=>{
-    Tag.create({
-        _id: "sad",
-        timesClicked: 0,
-    }).then(function(newTag){
-        res.send(newTag);
-    })
-})
+// app.post("/",(req,res) => {
+//     const newTag = req.body;
+//     console.log(JSON.stringify(req.body))
+//     Tag.create({
+//         name:newTag.name,
+//         timesClicked: newTag.timesClicked
+//     }).then(function(newTag){
+//         res.send(newTag);
+//     })
+// })
 
-// Articles
 app.get("/articles", (req,res)=>{})
 app.get("/articles/:id", (req,res)=>{})
 app.post("/articles", (req,res)=>{})
 app.delete("/articles/:id", (req,res)=>{})
-
-// Tags
-app.get("/tags", (req,res)=>{})
-app.get("/tags/:id", (req,res)=>{})
-app.post("/tags/:id", (req,res)=>{})
-app.delete("/tags/:id", (req,res)=>{})
-
-// Users
-app
-.get("/user", (req,res)=>{
-
+app.get("/tags", (req,res)=>{
+    Tag.find({}, (err, data) => res.send(data))
 })
-.get("/user/:id", (req,res)=>{
-
+app.get("/tags/:name", (req,res)=>{
+    console.log(req.params.name)
+    Tag.find({name: req.params.name}, (err, data) => res.send(data));
 })
-.post("/user", (req,res)=>{ // create / registrate new user
-
+app.post("/tags", (req,res)=>{
+    const newTag = req.body;
+    console.log(newTag)
+    Tag.exists({name:newTag.name},(error, result)=>{
+        console.log(JSON.stringify(result).length)
+        if (error){
+            console.log(error)
+        } else {
+            if(JSON.stringify(result).length < 4){
+                Tag.create({
+                            name:newTag.name,
+                            timesClicked: newTag.timesClicked
+                        }).then(function(newTag){
+                            res.send(newTag);
+                        })
+            } else {
+                Tag.updateOne({name:newTag.name},{$inc:{timesClicked:1}}).then(function (updatedTag) {
+                    res.send(updatedTag);
+                });
+            }             
+        }
+    })
+    // const newTag = req.body;
+    // console.log(JSON.stringify(req.body))
+    // Tag.create({
+    //     name:newTag.name,
+    //     timesClicked: newTag.timesClicked
+    // }).then(function(newTag){
+    //     res.send(newTag);
+    // })
 })
-.delete("/user/:id", (req,res)=>{
 
-})
-.post("/login", (req, res) => {
-  
+app.delete("/tags/:name", (req,res)=>{
+    Tag.deleteOne({ name: req.params.name }).then(function () {
+        res.end();
+      });
 })
 
 
