@@ -1,18 +1,28 @@
 const express = require('express')
 const mongoose = require("mongoose");
-const article = require("./model/articlesModel")
-const tag = require("./model/tagModel")
+const config = require("dotenv")
+config.config();
+const Article = require("./model/articlesModel")
+const Tag = require("./model/tagModel")
 const app = express()
 const PORT = process.env.PORT || 3010;
+const cors = require('cors');
 
-// const cors = require('cors');
-// app.use(cors());
-const mongoDB = "";
-// mongoose.connect(mongoDB);
+app.use(cors());
+const mongoDB = process.env.DB_CONNECT;
+mongoose.connect(mongoDB);
 
-// app.get('/',(req,res)=>{
-//     res.send("Server is running and listening to requests.")
-// })
+app.get('/',(req,res)=>{
+    res.send("Server is running and listening to requests.")
+})
+app.post("/",(req,res)=>{
+    Tag.create({
+        _id: "sad",
+        timesClicked: 0,
+    }).then(function(newTag){
+        res.send(newTag);
+    })
+})
 
 app.get("/articles", (req,res)=>{})
 app.get("/articles/:id", (req,res)=>{})
