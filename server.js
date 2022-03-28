@@ -1,7 +1,9 @@
 const express = require('express')
 const mongoose = require("mongoose");
+const article = require("./model/articlesModel")
+const tag = require("./model/tagModel")
 const app = express()
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3010;
 
 // const cors = require('cors');
 // app.use(cors());
