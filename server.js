@@ -15,26 +15,64 @@ mongoose.connect(mongoDB);
 app.get('/',(req,res) => {
     res.send("Server is running and listening to requests.")
 })
-// app.post("/",(req,res) => {
-//     const newTag = req.body;
-//     console.log(JSON.stringify(req.body))
-//     Tag.create({
-//         name:newTag.name,
-//         timesClicked: newTag.timesClicked
-//     }).then(function(newTag){
-//         res.send(newTag);
-//     })
-// })
 
-app.get("/articles", (req,res)=>{})
-app.get("/articles/:id", (req,res)=>{})
-app.post("/articles", (req,res)=>{})
-app.delete("/articles/:id", (req,res)=>{})
+//Articles
+app.get("/articles", (req,res)=>{
+    Article.find({}, (err, data) => res.send(data))
+})
+app.get("/articles/:id", (req,res)=>{
+    Article.find({id: req.params.id}, (err, data) => res.send(data));
+})
+app.post("/articles", (req,res)=>{
+    const newArticle = req.body;
+    if(newArticle.ext === false){
+        Article.create({
+            id: newArticle.id,
+            title: newArticle.title,
+            body: newArticle.body,
+            tags: newArticle.tags,
+            url: "/",
+            ext: false,
+            visible: true,    
+        })
+    } else {
+        Article.create({
+            id: newArticle.id,
+            title: newArticle.title,
+            body: newArticle.body,
+            tags: newArticle.tags,
+            url: newArticle.url,
+            ext: true,
+            visible: true,
+        })
+    }
+   
+})
+app.put("/articles/:id", (req,res) => {
+    const newArticle = req.body;
+    Article.updateOne({id: req.params.id},{$set:{
+        id: newArticle.id,
+        title: newArticle.title,
+        body: newArticle.body,
+        tags: newArticle.tags,
+        url: newArticle.url,
+        ext: newArticle.ext,
+        visible: newArticle.visible,    
+    }})
+})
+app.delete("/articles/:id", (req,res)=>{
+    Article.deleteOne({ id: req.params.id }).then(function () {
+        res.end();
+      });
+})
+//Search for Articles based on Tags
+app.get("/articles/:tags", (req,res)=>{})
+
+//Tags
 app.get("/tags", (req,res)=>{
     Tag.find({}, (err, data) => res.send(data))
 })
 app.get("/tags/:name", (req,res)=>{
-    console.log(req.params.name)
     Tag.find({name: req.params.name}, (err, data) => res.send(data));
 })
 app.post("/tags", (req,res)=>{
@@ -60,13 +98,12 @@ app.post("/tags", (req,res)=>{
         }
     })
 })
-
 app.delete("/tags/:name", (req,res)=>{
     Tag.deleteOne({ name: req.params.name }).then(function () {
         res.end();
       });
 })
-
+//Users
 
 app.listen(PORT, () => {
     console.warn(`App listening on http://localhost:${PORT}`);
