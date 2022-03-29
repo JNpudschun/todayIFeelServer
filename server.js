@@ -45,7 +45,7 @@ app.post("/tags", (req,res)=>{
         if (error){
             console.log(error)
         } else {
-            if(JSON.stringify(result).length < 4){
+            if(JSON.stringify(result).length < 5){
                 Tag.create({
                             name:newTag.name,
                             timesClicked: newTag.timesClicked
@@ -59,14 +59,6 @@ app.post("/tags", (req,res)=>{
             }             
         }
     })
-    // const newTag = req.body;
-    // console.log(JSON.stringify(req.body))
-    // Tag.create({
-    //     name:newTag.name,
-    //     timesClicked: newTag.timesClicked
-    // }).then(function(newTag){
-    //     res.send(newTag);
-    // })
 })
 
 app.delete("/tags/:name", (req,res)=>{
