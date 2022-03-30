@@ -9,7 +9,8 @@ const articleSchema = new Schema({
   url:{ type:String, default:"/"},
   ext:{ type:Boolean, required: true, default: false},
   visible:{ type:Boolean, required: true, default: true},
-  date: { type: Date, default: Date.now },
+  createdDate: { type: Date, default: Date.now },
+  updatedDate: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("Article", articleSchema);

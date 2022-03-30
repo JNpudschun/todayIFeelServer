@@ -34,7 +34,7 @@ app.post("/articles", (req,res)=>{
             url: newArticle.url,
             ext: newArticle.ext,
             visible: newArticle.visible,
-            date: newArticle.date,    
+            createdDate: newArticle.createdDate,    
         }).then(function(newArticles){
             res.send(newArticles);
         })
@@ -62,7 +62,8 @@ app.put("/articles/:id", (req,res) => {
         tags: newArticle.tags,
         url: newArticle.url,
         ext: newArticle.ext,
-        visible: newArticle.visible,   
+        visible: newArticle.visible,
+        updatedDate: Date.now(),   
     }}).then(function(newArticles){
         res.send(newArticles);})
 })
@@ -75,9 +76,28 @@ app.delete("/articles/:id", (req,res)=>{
 app.get("/search/:tags", (req,res)=>{
     let tagArr = req.params.tags.split(",");
     console.log(tagArr)
-    Article.find({tags:{$in:[tagArr[0],tagArr[1],tagArr[2]]} }, (err, data) => {
-        console.log(data);
-        res.send(data)
+    Article.find({tags:{$in:[...tagArr]} }, (err, data) => {
+        let arr3hits=[];
+        let arr2hits=[];
+        let arr1hits=[];
+        for(let i = 0; i<data.length;i++){
+            let count = 0;
+            for(let j = 0; j<data[i].tags.length;j++){
+                if(tagArr.includes(data[i].tags[j])){
+                    count +=1;
+                }
+            }
+            if(count ===3){
+                arr3hits.push(data[i])
+            } else if(count ===2){
+                arr2hits.push(data[i])
+            } else {
+                arr1hits.push(data[i])
+            }
+            
+        }
+        let sortedArr = arr3hits.concat(arr2hits).concat(arr1hits)
+        res.send(sortedArr)
     });
 })
 
