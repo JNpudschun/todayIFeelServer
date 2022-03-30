@@ -31,9 +31,12 @@ app.post("/articles", (req,res)=>{
             title: newArticle.title,
             body: newArticle.body,
             tags: newArticle.tags,
-            url: "/",
-            ext: false,
-            visible: true,    
+            url: newArticle.url,
+            ext: newArticle.ext,
+            visible: newArticle.visible,
+            date: newArticle.date,    
+        }).then(function(newArticles){
+            res.send(newArticles);
         })
     } else {
         Article.create({
@@ -42,9 +45,11 @@ app.post("/articles", (req,res)=>{
             body: newArticle.body,
             tags: newArticle.tags,
             url: newArticle.url,
-            ext: true,
-            visible: true,
-        })
+            ext: newArticle.ext,
+            visible: newArticle.visible,
+            date: newArticle.date,
+        }).then(function(newArticles){
+            res.send(newArticles);})
     }
    
 })
@@ -57,8 +62,9 @@ app.put("/articles/:id", (req,res) => {
         tags: newArticle.tags,
         url: newArticle.url,
         ext: newArticle.ext,
-        visible: newArticle.visible,    
-    }})
+        visible: newArticle.visible,   
+    }}).then(function(newArticles){
+        res.send(newArticles);})
 })
 app.delete("/articles/:id", (req,res)=>{
     Article.deleteOne({ id: req.params.id }).then(function () {
@@ -66,7 +72,14 @@ app.delete("/articles/:id", (req,res)=>{
       });
 })
 //Search for Articles based on Tags
-app.get("/articles/:tags", (req,res)=>{})
+app.get("/search/:tags", (req,res)=>{
+    let tagArr = req.params.tags.split(",");
+    console.log(tagArr)
+    Article.find({tags:{$in:[tagArr[0],tagArr[1],tagArr[2]]} }, (err, data) => {
+        console.log(data);
+        res.send(data)
+    });
+})
 
 //Tags
 app.get("/tags", (req,res)=>{

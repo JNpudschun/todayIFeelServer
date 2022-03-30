@@ -6,9 +6,9 @@ const articleSchema = new Schema({
   title:{ type:String, required: true},
   body:{ type:String, required: true},
   tags:{ type:Array, required: true},
-  url:{ type:String},
-  ext:{ type:Boolean, required: true},
-  visible:{ type:Boolean, required: true},
+  url:{ type:String, default:"/"},
+  ext:{ type:Boolean, required: true, default: false},
+  visible:{ type:Boolean, required: true, default: true},
   date: { type: Date, default: Date.now },
 });
 
