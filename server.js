@@ -20,14 +20,13 @@ app.get('/',(req,res) => {
 app.get("/articles", (req,res)=>{
     Article.find({}, (err, data) => res.send(data))
 })
-app.get("/articles/:id", (req,res)=>{
-    Article.find({id: req.params.id}, (err, data) => res.send(data));
+app.get("/articles/:_id", (req,res)=>{
+    Article.find({_id: req.params._id}, (err, data) => res.send(data));
 })
 app.post("/articles", (req,res)=>{
     const newArticle = req.body;
-    if(newArticle.ext === false){
         Article.create({
-            id: newArticle.id,
+            // id: newArticle.id,
             title: newArticle.title,
             body: newArticle.body,
             tags: newArticle.tags,
@@ -38,25 +37,13 @@ app.post("/articles", (req,res)=>{
         }).then(function(newArticles){
             res.send(newArticles);
         })
-    } else {
-        Article.create({
-            id: newArticle.id,
-            title: newArticle.title,
-            body: newArticle.body,
-            tags: newArticle.tags,
-            url: newArticle.url,
-            ext: newArticle.ext,
-            visible: newArticle.visible,
-            date: newArticle.date,
-        }).then(function(newArticles){
-            res.send(newArticles);})
-    }
+    
    
 })
-app.put("/articles/:id", (req,res) => {
+app.put("/articles/:_id", (req,res) => {
     const newArticle = req.body;
-    Article.updateOne({id: req.params.id},{$set:{
-        id: newArticle.id,
+    Article.updateOne({_id: req.params._id},{$set:{
+        // id: newArticle.id,
         title: newArticle.title,
         body: newArticle.body,
         tags: newArticle.tags,
@@ -68,7 +55,7 @@ app.put("/articles/:id", (req,res) => {
         res.send(newArticles);})
 })
 app.delete("/articles/:id", (req,res)=>{
-    Article.deleteOne({ id: req.params.id }).then(function () {
+    Article.deleteOne({ _id: req.params._id }).then(function () {
         res.end();
       });
 })
