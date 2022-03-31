@@ -4,6 +4,7 @@ const config = require("dotenv")
 config.config();
 const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
+const User = require("./model/userModel")
 const app = express()
 const PORT = process.env.PORT || 3010;
 const cors = require('cors');
@@ -162,7 +163,23 @@ app.delete("/tags/:name", (req,res)=>{
         console.log(error)
     }
 })
-//Users
+// Users
+app
+.get("/user", (req,res)=>{
+
+})
+.get("/user/:id", (req,res)=>{
+
+})
+.post("/user", (req,res)=>{ // create / registrate new user
+
+})
+.delete("/user/:id", (req,res)=>{
+
+})
+.post("/login", (req, res) => {
+  
+})
 
 app.listen(PORT, () => {
     console.warn(`App listening on http://localhost:${PORT}`);
