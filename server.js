@@ -1,28 +1,35 @@
+//importing neccessary packages
 const express = require('express')
 const mongoose = require("mongoose");
 const config = require("dotenv")
-config.config();
+const jwt = require("jsonwebtoken")
+const cookieParser = require("cookie-parser")
+const cors = require('cors');
+//importing Schema and Dtabasemodels
 const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
 const User = require("./model/userModel")
-const jwt = require("jsonwebtoken")
-const cookieParser = require("cookie-parser")
+//creating needed variables
+const mongoDB = process.env.DB_CONNECT;
 const app = express()
 const PORT = process.env.PORT || 3010;
-const cors = require('cors');
+//setting up the app to use neccesary middleware
+config.config();
 app.use(express.json())
 app.use(cors());
 app.use(cookieParser());
-const mongoDB = process.env.DB_CONNECT;
+//connecting to database and after that setting app to listen on correct port
 mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
     console.warn(`App listening on http://localhost:${PORT}`);}))
 .catch((err) => console.log(err));
-
+//anchor so something is displayed on root when server is running
 app.get('/',(req,res) => {
     res.send("Server is running and listening to requests.")
 })
 
-//Articles
+//ARTICLES
+
+//GET a list of all articles
 app.get("/articles", (req,res)=>{
     try{
         Article.find({}, (err, data) => res.send(data))
@@ -31,6 +38,7 @@ app.get("/articles", (req,res)=>{
         res.send(error)
     }
 })
+//GET a single article by his id
 app.get("/articles/:_id", (req,res)=>{
     try{
         Article.find({_id: req.params._id}, (err, data) => res.send(data));
@@ -39,6 +47,7 @@ app.get("/articles/:_id", (req,res)=>{
         res.send(error)
     }
 })
+//POST a new article to the database
 app.post("/articles", (req,res)=>{
     try{
         const newArticle = req.body;
@@ -60,6 +69,7 @@ app.post("/articles", (req,res)=>{
     }
    
 })
+//Modify a existing article in the database
 app.put("/articles/:_id", (req,res) => {
     try{
         const newArticle = req.body;
@@ -79,6 +89,7 @@ app.put("/articles/:_id", (req,res) => {
         res.send(error)
     }
 })
+//DELETE an article by id from the datavase
 app.delete("/articles/:_id", (req,res)=>{
     try{
         Article.deleteOne({ _id: req.params._id }).then(function () {
@@ -89,15 +100,20 @@ app.delete("/articles/:_id", (req,res)=>{
         res.send(error)
     }
 })
-//Search for Articles based on Tags
+//SEARCH for all articles with one of the tags in the params
+
+//TODO make if depending on wether ist a search or a vote so based on if vote cookie already exists or not
 app.get("/search/:tags", (req,res)=>{
     try{
+        //split params into an arry for easyer database querying
         let tagArr = req.params.tags.split(",");
-        console.log(tagArr)
+        //looks for all articles tha have tag thats inside the tagArr
         Article.find({tags:{$in:[...tagArr]} }, (err, data) => {
+            //Arrays to help sort returned articles by number of tags out of tagArr an article has
             let arr3hits=[];
             let arr2hits=[];
             let arr1hits=[];
+            // go over the returned articles and theyr tags to get number of article tags in tagArr
             for(let i = 0; i<data.length;i++){
                 let count = 0;
                 for(let j = 0; j<data[i].tags.length;j++){
@@ -105,15 +121,16 @@ app.get("/search/:tags", (req,res)=>{
                         count +=1;
                     }
                 }
+                //sort Articles by number of hits into diffrent arrays
                 if(count ===3){
                     arr3hits.push(data[i])
                 } else if(count ===2){
                     arr2hits.push(data[i])
                 } else {
                     arr1hits.push(data[i])
-                }
-                
+                } 
             }
+            //concat arrays to returne on array of results second sortng criteria is by id
             let sortedArr = arr3hits.concat(arr2hits).concat(arr1hits)
             res.send(sortedArr)
         });
@@ -123,7 +140,9 @@ app.get("/search/:tags", (req,res)=>{
     }
 })
 
-//Tags
+//TAGS
+
+//GET a list of all tags and their clickcounts 
 app.get("/tags", (req,res)=>{
     try{
         Tag.find({}, (err, data) => res.send(data))
@@ -132,6 +151,7 @@ app.get("/tags", (req,res)=>{
         res.send(error)
     }
 })
+//GET one Tag by its name(displayed value)
 app.get("/tags/:name", (req,res)=>{
     try{
         Tag.find({name: req.params.name}, (err, data) => res.send(data));
@@ -140,16 +160,23 @@ app.get("/tags/:name", (req,res)=>{
         res.send(error)
     }
 })
+//CREATE an new Tag or update a existing one f it already exists
 app.post("/tags", (req,res)=>{
     try{
+        // get the tag information out of the requestbody
         const newTag = req.body;
         console.log(newTag)
+        //check in database if Tag exists if yes returns the ObjectId of the tag
         Tag.exists({name:newTag.name},(error, result)=>{
-            console.log(JSON.stringify(result).length)
+            // console.log(JSON.stringify(result).length)
             if (error){
                 console.log(error)
             } else {
+                //ObjectId gets retuned or an empty object and 
+                //the stringyfied version of the Object has a lengt of 4
+                //so we check this way if there is a returned Id
                 if(JSON.stringify(result).length < 5){
+                    //cretate the new Tag and send it back as a response
                     Tag.create({
                                 name:newTag.name,
                                 timesClicked: newTag.timesClicked
@@ -157,6 +184,8 @@ app.post("/tags", (req,res)=>{
                                 res.send(newTag);
                             })
                 } else {
+                    //If the Tag already exists we only ever want to change the clickcounter this way so
+                    //it gets increased by one when the method gets called
                     Tag.updateOne({name:newTag.name},{$inc:{timesClicked:1}}).then(function (updatedTag) {
                         res.send(updatedTag);
                     });
@@ -168,6 +197,7 @@ app.post("/tags", (req,res)=>{
         res.send(error)
     }
 })
+//DELETE a Tag by its name from the database
 app.delete("/tags/:name", (req,res)=>{
     try{
         Tag.deleteOne({ name: req.params.name }).then(function () {
@@ -178,7 +208,9 @@ app.delete("/tags/:name", (req,res)=>{
         res.send(error)
     }
 })
-// Users
+// USERS / AUTHORIZATION
+
+//function to handle indiviual errors on login and return pecific error messages
 function handleErrors(err){
     console.log(err.message, err.code)
     let errors = { email:'',password:''}
@@ -186,7 +218,6 @@ function handleErrors(err){
     if (err.message === 'incorrect email') {
         errors.email = 'That email is not registered';
     }
-
     // incorrect password
     if (err.message === 'incorrect password') {
         errors.password = 'That password is incorrect';
@@ -205,12 +236,14 @@ function handleErrors(err){
     }
     return errors;
 }
+//Maximum age of the login jwt token
 const maxAge = 1 * 24 * 60 * 60; // one day in seconds
+//function create a token based on a secret String for a given UserId
 function createToken(id){
     return jwt.sign({ id }, process.env.SECRET_STRING, {expiresIn:maxAge})
 }
-app
-.get("/user", (req,res)=>{
+//GET a list of all registered Users
+app.get("/user", (req,res)=>{
     try{
         User.find({}, (err, data) => res.send(data))
     }catch(error){
@@ -218,7 +251,8 @@ app
         res.send(error)
     }
 })
-.get("/user/:_id", (req,res)=>{
+//GET a singular user by his id
+app.get("/user/:_id", (req,res)=>{
     try{
         User.find({_id: req.params._id}, (err, data) => res.send(data));
     }catch(error){
@@ -226,7 +260,8 @@ app
         res.send(error)
     }
 })
-.delete("/user/:_id", (req,res)=>{
+//DELETE a user by his id
+app.delete("/user/:_id", (req,res)=>{
     try{
         User.deleteOne({ _id: req.params._id }).then(function () {
             res.end();
@@ -236,54 +271,67 @@ app
         res.send(error)
     }
 })
-.post("/user", async (req,res)=>{ // create / registrate new user
+//CREATE a new User and signup the User and Log him in after creating a jwt token for him
+app.post("/user", async (req,res)=>{
+    // get the send email and passwort for the new user
     const newUser = req.body;
     try{
+        //create the new user
         const user = await User.create({
             email: newUser.email,
             password: newUser.password
         })
-        console.log(user)
+        // console.log(user)
+        //create then attach the token to a cookie for the user
         const token = await createToken(user._id);
         res.cookie('jwt',token,{maxAge:maxAge * 1000})
+        //respond with created user id and giving the cookie to logged in user in the process
         res.status(201).json({ user: user._id });
     } catch (error){
         const errors = handleErrors(error);
         res.status(400).json({errors})
     }
 })
-.post("/login", async (req, res) => {
+//LOGIN a user and create jwt token for him 
+app.post("/login", async (req, res) => {
+    //Get the send login credentials
     const { email, password } = req.body;
 
-  try {
-    const user = await User.authenticate(email, password);
-    const token = await createToken(user._id);
-    res.cookie('jwt',token,{maxAge:maxAge * 1000})
-    res.status(200).json({ user: user._id });
-  } catch (error) {
-    const errors = handleErrors(error);
-    res.status(400).json({errors})
-  }
-  
+    try {
+        // call method to authenticate the credentials
+        const user = await User.authenticate(email, password);
+        // since user will be empty if the authentification doesn't match
+        // we can continue by creating the token for the verified user
+        const token = await createToken(user._id);
+        // return the cookie with the jwt token and the userid
+        res.cookie('jwt',token,{maxAge:maxAge * 1000})
+        res.status(200).json({ user: user._id });
+    } catch (error) {
+        const errors = handleErrors(error);
+        res.status(400).json({errors})
+    }
 })
-.get("/logout", (req,res)=>{
+//LOGOUT a user by giving him a cookie of same name thats emoty and expires after 2 millisecong
+app.get("/logout", (req,res)=>{
     res.cookie('jwt','',{maxAge:1})
     res.send("User successfully logged out")
 })
-.get("/verify", (req,res)=>{
+//VERIFY the Token of user trying to access a route that has accescontrol on it
+app.get("/verify", (req,res)=>{
     const token = req.cookies.jwt;
-
-  // check json web token exists & is verified
-  if (token) {
-    jwt.verify(token, process.env.SECRET_STRING, (err, decodedToken) => {
-      if (err) {
-        res.send(err.message);
-      } else {
-        // console.log(decodedToken);
-        res.send("OK")
-      }
-    });
-  } else {
-    res.send("Not verified")
-  }
+    // check json web token exists & is verified
+    if (token) {
+        jwt.verify(token, process.env.SECRET_STRING, (err, decodedToken) => {
+            if (err) {
+                res.send(err.message);
+            } else {
+                // console.log(decodedToken);
+                //Return certain string if user is verified 
+                res.send("OK")
+            }
+        });
+    } else {
+        //Return a diffrent string if user is not verified
+        res.send("Not verified")
+    }
 })
