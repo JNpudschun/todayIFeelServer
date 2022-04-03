@@ -10,11 +10,11 @@ const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
 const User = require("./model/userModel")
 //creating needed variables
+config.config();
 const mongoDB = process.env.DB_CONNECT;
 const app = express()
 const PORT = process.env.PORT || 3010;
 //setting up the app to use neccesary middleware
-config.config();
 app.use(express.json())
 app.use(cors());
 app.use(cookieParser());
@@ -101,39 +101,120 @@ app.delete("/articles/:_id", (req,res)=>{
     }
 })
 //SEARCH for all articles with one of the tags in the params
-
-//TODO make if depending on wether ist a search or a vote so based on if vote cookie already exists or not
-app.get("/search/:tags", (req,res)=>{
+app.get("/search/:tags", async (req,res)=>{
     try{
         //split params into an arry for easyer database querying
         let tagArr = req.params.tags.split(",");
-        //looks for all articles tha have tag thats inside the tagArr
-        Article.find({tags:{$in:[...tagArr]} }, (err, data) => {
-            //Arrays to help sort returned articles by number of tags out of tagArr an article has
-            let arr3hits=[];
-            let arr2hits=[];
-            let arr1hits=[];
-            // go over the returned articles and theyr tags to get number of article tags in tagArr
-            for(let i = 0; i<data.length;i++){
-                let count = 0;
-                for(let j = 0; j<data[i].tags.length;j++){
-                    if(tagArr.includes(data[i].tags[j])){
-                        count +=1;
+        let indicator = tagArr.shift();
+        console.log(indicator,tagArr,req.cookies.voted)
+        if(indicator === "vote" && req.cookies.voted){
+            // res.cookie('voted',false,{maxAge:1})
+            res.send("You already voted today please use the searchfunction or try again after 0:00GMT")
+        }else if(indicator === "vote" && !req.cookies.voted ){
+            //looks for all articles tha have tag thats inside the tagArr
+            Article.find({tags:{$in:[...tagArr]} }, (err, data) => {
+                //Arrays to help sort returned articles by number of tags out of tagArr an article has
+                let arr3hits=[];
+                let arr2hits=[];
+                let arr1hits=[];
+                // go over the returned articles and theyr tags to get number of article tags in tagArr
+                for(let i = 0; i<data.length;i++){
+                    let count = 0;
+                    for(let j = 0; j<data[i].tags.length;j++){
+                        if(tagArr.includes(data[i].tags[j])){
+                            count +=1;
+                        }
                     }
+                    //sort Articles by number of hits into diffrent arrays
+                    if(count ===3){
+                        arr3hits.push(data[i])
+                    } else if(count ===2){
+                        arr2hits.push(data[i])
+                    } else {
+                        arr1hits.push(data[i])
+                    } 
                 }
-                //sort Articles by number of hits into diffrent arrays
-                if(count ===3){
-                    arr3hits.push(data[i])
-                } else if(count ===2){
-                    arr2hits.push(data[i])
-                } else {
-                    arr1hits.push(data[i])
-                } 
-            }
-            //concat arrays to returne on array of results second sortng criteria is by id
-            let sortedArr = arr3hits.concat(arr2hits).concat(arr1hits)
-            res.send(sortedArr)
-        });
+                //concat arrays to returne on array of results second sortng criteria is by id
+                let sortedArr = arr3hits.concat(arr2hits).concat(arr1hits)
+                // console.log(sortedArr) 
+                let tagRetArr=[]           
+                for(let i = 0; i<tagArr.length;i++){
+                     //check in database if Tag exists if yes returns the ObjectId of the tag
+                    Tag.exists({name:tagArr[i]},(error, result)=>{
+                        // console.log(JSON.stringify(result).length)
+                        if (error){
+                            console.log(error)
+                        } else {
+                            //ObjectId gets retuned or an empty object and 
+                            //the stringyfied version of the Object has a lengt of 4
+                            //so we check this way if there is a returned Id
+                            if(JSON.stringify(result).length < 5){
+                                //cretate the new Tag and send it back as a response
+                                Tag.create({
+                                            name:tagArr[i],
+                                            timesClicked: 1
+                                        }).then(function(tag){
+                                            tagRetArr.push(tag)
+                                        })
+                            } else {
+                                //If the Tag already exists we only ever want to change the clickcounter this way so
+                                //it gets increased by one when the method gets called
+                                Tag.updateOne({name:tagArr[i]},{$inc:{timesClicked:1}}).then(function(tag){
+                                    tagRetArr.push(tag)
+                                });      
+                            }             
+                        }
+                    })   
+                }
+                let date = new Date(Date.now() + (3600 * 1000 * 24))
+                let dateArray = [date.getFullYear(),date.getMonth(),date.getDate()]
+                if(dateArray[1] < 9){
+                    dateArray[1] = '0'+ (dateArray[1]+1);
+                } else if(dateArray[1] === 9){
+                    dateArray[1] += 1;
+                }
+                if(dateArray[2] < 9){
+                    dateArray[2] = '0'+ (dateArray[2]+1);
+                } else if(dateArray[2] === 9){
+                    dateArray[2] += 1;
+                }
+                const date2 = new Date(dateArray[0]+'-'+dateArray[1]+'-'+dateArray[2]+'T00:00:00')
+                const date3 = new Date(date2 - (3600 * 1000 * 22));                
+                res.cookie('voted',true,{expires:date3})
+                res.send(sortedArr)
+            }); 
+        }
+        if(indicator === "search"){
+            //looks for all articles tha have tag thats inside the tagArr
+            Article.find({tags:{$in:[...tagArr]} }, (err, data) => {
+                //Arrays to help sort returned articles by number of tags out of tagArr an article has
+                let arr3hits=[];
+                let arr2hits=[];
+                let arr1hits=[];
+                // go over the returned articles and theyr tags to get number of article tags in tagArr
+                for(let i = 0; i<data.length;i++){
+                    let count = 0;
+                    for(let j = 0; j<data[i].tags.length;j++){
+                        if(tagArr.includes(data[i].tags[j])){
+                            count +=1;
+                        }
+                    }
+                    //sort Articles by number of hits into diffrent arrays
+                    if(count ===3){
+                        arr3hits.push(data[i])
+                    } else if(count ===2){
+                        arr2hits.push(data[i])
+                    } else {
+                        arr1hits.push(data[i])
+                    } 
+                }
+                //concat arrays to returne on array of results second sortng criteria is by id
+                let sortedArr = arr3hits.concat(arr2hits).concat(arr1hits)
+                // console.log(sortedArr)
+                res.send(sortedArr)
+            });             
+        }
+        
     }catch(error){
         console.log(error)
         res.send(error)
@@ -160,13 +241,14 @@ app.get("/tags/:name", (req,res)=>{
         res.send(error)
     }
 })
+
+
 //CREATE an new Tag or update a existing one f it already exists
 app.post("/tags", (req,res)=>{
     try{
         // get the tag information out of the requestbody
         const newTag = req.body;
-        console.log(newTag)
-        //check in database if Tag exists if yes returns the ObjectId of the tag
+         //check in database if Tag exists if yes returns the ObjectId of the tag
         Tag.exists({name:newTag.name},(error, result)=>{
             // console.log(JSON.stringify(result).length)
             if (error){
@@ -176,22 +258,23 @@ app.post("/tags", (req,res)=>{
                 //the stringyfied version of the Object has a lengt of 4
                 //so we check this way if there is a returned Id
                 if(JSON.stringify(result).length < 5){
+                    
                     //cretate the new Tag and send it back as a response
                     Tag.create({
                                 name:newTag.name,
                                 timesClicked: newTag.timesClicked
-                            }).then(function(newTag){
-                                res.send(newTag);
+                            }).then(function(tag){
+                                res.send(tag)
                             })
                 } else {
                     //If the Tag already exists we only ever want to change the clickcounter this way so
                     //it gets increased by one when the method gets called
                     Tag.updateOne({name:newTag.name},{$inc:{timesClicked:1}}).then(function (updatedTag) {
-                        res.send(updatedTag);
-                    });
+                        res.send(updatedTag)
+                    });      
                 }             
             }
-        })
+        })   
     }catch(error){
         console.log(error)
         res.send(error)
@@ -296,7 +379,6 @@ app.post("/user", async (req,res)=>{
 app.post("/login", async (req, res) => {
     //Get the send login credentials
     const { email, password } = req.body;
-
     try {
         // call method to authenticate the credentials
         const user = await User.authenticate(email, password);

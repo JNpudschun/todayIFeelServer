@@ -8,7 +8,7 @@ const tagSchema = new Schema({
       },
     timesClicked: {
         type: Number,
-        required: true
+        default:0
       },
   
 });
