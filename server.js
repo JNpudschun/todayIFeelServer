@@ -9,6 +9,7 @@ const cors = require('cors');
 const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
 const User = require("./model/userModel")
+const ExpDate = require("./model/dateModel")
 //creating needed variables
 config.config();
 const mongoDB = process.env.DB_CONNECT;
@@ -152,14 +153,15 @@ app.get("/search/:tags", async (req,res)=>{
                                 //cretate the new Tag and send it back as a response
                                 Tag.create({
                                             name:tagArr[i],
-                                            timesClicked: 1
+                                            timesClicked: 1,
+                                            weeklyTimesClicked: 1
                                         }).then(function(tag){
                                             tagRetArr.push(tag)
                                         })
                             } else {
                                 //If the Tag already exists we only ever want to change the clickcounter this way so
                                 //it gets increased by one when the method gets called
-                                Tag.updateOne({name:tagArr[i]},{$inc:{timesClicked:1}}).then(function(tag){
+                                Tag.updateOne({name:tagArr[i]},{$inc:{timesClicked:1, weeklyTimesClicked:1}}).then(function(tag){
                                     tagRetArr.push(tag)
                                 });      
                             }             
@@ -262,14 +264,15 @@ app.post("/tags", (req,res)=>{
                     //cretate the new Tag and send it back as a response
                     Tag.create({
                                 name:newTag.name,
-                                timesClicked: newTag.timesClicked
+                                timesClicked: newTag.timesClicked,
+                                weeklyTimesClicked: newTag.weeklyTimesClicked
                             }).then(function(tag){
                                 res.send(tag)
                             })
                 } else {
                     //If the Tag already exists we only ever want to change the clickcounter this way so
                     //it gets increased by one when the method gets called
-                    Tag.updateOne({name:newTag.name},{$inc:{timesClicked:1}}).then(function (updatedTag) {
+                    Tag.updateOne({name:newTag.name},{$inc:{timesClicked:1, weeklyTimesClicked:1}}).then(function (updatedTag) {
                         res.send(updatedTag)
                     });      
                 }             
@@ -417,3 +420,45 @@ app.get("/verify", (req,res)=>{
         res.send("Not verified")
     }
 })
+function setExpDate(){
+    ExpDate.find({key: 1}).then(result =>{
+        weeklyExpirationDate = result[0];
+        // console.log(result)
+        if(result.length === 0){
+            let date = new Date('2022-04-12T00:00:00');
+            let date2 =new Date(date - (3600 * 1000 * 22));   
+            console.log(date2.toUTCString(),"Entered Create")
+            ExpDate.create({
+                expires: date2
+            }).then((date)=> {
+                weeklyExpirationDate = date;
+                console.log(weeklyExpirationDate)
+            })
+              
+        }
+        // weeklyExpirationDate = result;
+        console.log(weeklyExpirationDate)
+    })
+    
+}
+function intervalFunc() {
+    if(count === 0){
+        console.log("Entered first load")
+        setExpDate();
+        count+=1;
+    }else{
+        console.log("Entered updatecheck")
+        let date = new Date();
+        console.log(date,weeklyExpirationDate.expires,count)
+        if(date > weeklyExpirationDate.expires){
+            weeklyExpirationDate.expires.setDate(weeklyExpirationDate.expires.getDate()+7)
+            console.log(weeklyExpirationDate)
+            Tag.updateMany({},{$set:{weeklyTimesClicked:0}}).then(tag=>console.log(date))
+            ExpDate.updateOne({key:1},{$set:{expires:weeklyExpirationDate.expires}}).then(date=>console.log(date))
+            count+=1;
+        }
+    }  
+  }
+let weeklyExpirationDate;
+let count = 0; 
+setInterval(intervalFunc, 1000*60);

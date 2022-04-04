@@ -10,6 +10,10 @@ const tagSchema = new Schema({
         type: Number,
         default:0
       },
+    weeklyTimesClicked: {
+      type: Number,
+      default: 0
+    }
   
 });
 
