@@ -17,7 +17,7 @@ const app = express()
 const PORT = process.env.PORT || 3010;
 //setting up the app to use neccesary middleware
 app.use(express.json())
-app.use(cors());
+app.use(cors({origin: 'http://localhost:3000'}));
 app.use(cookieParser());
 //connecting to database and after that setting app to listen on correct port
 mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
@@ -182,7 +182,7 @@ app.get("/search/:tags", async (req,res)=>{
                 }
                 const date2 = new Date(dateArray[0]+'-'+dateArray[1]+'-'+dateArray[2]+'T00:00:00')
                 const date3 = new Date(date2 - (3600 * 1000 * 22));                
-                res.cookie('voted',true,{expires:date3})
+                res.cookie('voted',true,{expires:date3,httpOnly:true})
                 res.send(sortedArr)
             }); 
         }
