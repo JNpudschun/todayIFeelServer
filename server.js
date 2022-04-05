@@ -27,8 +27,8 @@ mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
 // Add headers before the routes are defined
 app.use(function (req, res, next) {
 
-    // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    // // Website you wish to allow to connect
+    // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
 
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -36,9 +36,9 @@ app.use(function (req, res, next) {
     // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
 
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
+    // // Set to true if you need the website to include cookies in the requests sent
+    // // to the API (e.g. in case you use sessions)
+    // res.setHeader('Access-Control-Allow-Credentials', true);
 
     // Pass to next layer of middleware
     next();
@@ -202,7 +202,7 @@ app.get("/search/:tags", async (req,res)=>{
                 }
                 const date2 = new Date(dateArray[0]+'-'+dateArray[1]+'-'+dateArray[2]+'T00:00:00')
                 const date3 = new Date(date2 - (3600 * 1000 * 22));                
-                res.cookie('voted',true,{expires:date3,httpOnly:true,sameSite:none})
+                res.cookie('voted',true,{expires:date3,httpOnly:true,sameSite:None,secure:true})
                 res.send(sortedArr)
             }); 
         }
@@ -390,7 +390,7 @@ app.post("/user", async (req,res)=>{
         // console.log(user)
         //create then attach the token to a cookie for the user
         const token = await createToken(user._id);
-        res.cookie('jwt',token,{maxAge:maxAge * 1000,httpOnly:true,sameSite:none})
+        res.cookie('jwt',token,{maxAge:maxAge * 1000,httpOnly:true,sameSite:None,secure:true})
         //respond with created user id and giving the cookie to logged in user in the process
         res.status(201).json({ user: user._id });
     } catch (error){
@@ -409,7 +409,7 @@ app.post("/login", async (req, res) => {
         // we can continue by creating the token for the verified user
         const token = await createToken(user._id);
         // return the cookie with the jwt token and the userid
-        res.cookie('jwt',token,{maxAge:maxAge * 1000,httpOnly:true,sameSite:none})
+        res.cookie('jwt',token,{maxAge:maxAge * 1000,httpOnly:true,sameSite:None,secure:true})
         res.status(200).json({ user: user._id });
     } catch (error) {
         const errors = handleErrors(error);
