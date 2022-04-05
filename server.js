@@ -17,7 +17,7 @@ const app = express()
 const PORT = process.env.PORT || 3010;
 //setting up the app to use neccesary middleware
 app.use(express.json())
-app.use(cors({origin: 'http://localhost:3000'}));
+app.use(cors({origin: 'http://localhost:3000',credentials:true}));
 app.use(cookieParser());
 //connecting to database and after that setting app to listen on correct port
 mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
