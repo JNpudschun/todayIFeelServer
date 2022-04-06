@@ -205,7 +205,7 @@ app.get("/search/:tags", async (req,res)=>{
                 }
                 const date2 = new Date(dateArray[0]+'-'+dateArray[1]+'-'+dateArray[2]+'T00:00:00')
                 const date3 = new Date(date2 - (3600 * 1000 * 22));                
-                res.cookie('voted',true,{expires:date3,httpOnly:true,sameSite:"none",secure:true, domain:"http://localhost:3000"})
+                res.cookie('voted',true,{expires:date3,httpOnly:true,sameSite:"none",secure:true})
                 res.send(sortedArr)
             }); 
         }
