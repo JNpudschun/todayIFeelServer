@@ -22,7 +22,7 @@ const corsOptions ={
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
-app.use(cors());
+// app.use(cors());
 // app.use(cors());
 app.use(cookieParser());
 //connecting to database and after that setting app to listen on correct port
