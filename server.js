@@ -22,7 +22,7 @@ const corsOptions ={
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
-app.use(cors(corsOptions));
+app.use(cors());
 // app.use(cors());
 app.use(cookieParser());
 //connecting to database and after that setting app to listen on correct port
@@ -36,7 +36,7 @@ app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
     // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
     // // Set to true if you need the website to include cookies in the requests sent
     // // to the API (e.g. in case you use sessions)
@@ -395,9 +395,6 @@ app.post("/user", async (req,res)=>{
         const token = await createToken(user._id);
         res.cookie('jwt',token,{maxAge:maxAge * 1000,httpOnly:true,sameSite:"none",secure:true})
         //respond with created user id and giving the cookie to logged in user in the process
-        res.setHeader('Access-Control-Allow-Credentials', true);
-        // Website you wish to allow to connect
-        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
         res.send({ user: user._id });
     } catch (error){
         const errors = handleErrors(error);
