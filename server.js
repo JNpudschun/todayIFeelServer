@@ -31,24 +31,21 @@ mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
 .catch((err) => console.log(err));
 
 // Add headers before the routes are defined
-// app.use(function (req, res, next) {
+app.use(function (req, res, next) {
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
-//     // // Website you wish to allow to connect
-//     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
 
-//     // Request methods you wish to allow
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-//     // Request headers you wish to allow
-//     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-
-//     // // Set to true if you need the website to include cookies in the requests sent
-//     // // to the API (e.g. in case you use sessions)
-//     res.setHeader('Access-Control-Allow-Credentials', true);
-
-//     // Pass to next layer of middleware
-//     next();
-// });
+    // // Set to true if you need the website to include cookies in the requests sent
+    // // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    // // Website you wish to allow to connect
+        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    // Pass to next layer of middleware
+    next();
+});
 //anchor so something is displayed on root when server is running
 app.get('/',(req,res) => {
     res.send("Server is running and listening to requests.")
@@ -398,7 +395,10 @@ app.post("/user", async (req,res)=>{
         const token = await createToken(user._id);
         res.cookie('jwt',token,{maxAge:maxAge * 1000,httpOnly:true,sameSite:"none",secure:true})
         //respond with created user id and giving the cookie to logged in user in the process
-        res.status(201).json({ user: user._id });
+        res.setHeader('Access-Control-Allow-Credentials', true);
+        // Website you wish to allow to connect
+        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+        res.send({ user: user._id });
     } catch (error){
         const errors = handleErrors(error);
         res.status(400).json({errors})
@@ -416,7 +416,7 @@ app.post("/login", async (req, res) => {
         const token = await createToken(user._id);
         // return the cookie with the jwt token and the userid
         res.cookie('jwt',token,{maxAge:maxAge * 1000,httpOnly:true,sameSite:"none",secure:true})
-        res.status(200).json({ user: user._id });
+        res.send({ user: user._id });
     } catch (error) {
         const errors = handleErrors(error);
         res.status(400).json({errors})
