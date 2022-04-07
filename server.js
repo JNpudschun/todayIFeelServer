@@ -398,7 +398,7 @@ app.post("/user", async (req,res)=>{
         res.send({ user: user._id });
     } catch (error){
         const errors = handleErrors(error);
-        res.status(400).json({errors})
+        res.send({errors})
     }
 })
 //LOGIN a user and create jwt token for him 
@@ -416,7 +416,7 @@ app.post("/login", async (req, res) => {
         res.send({ user: user._id });
     } catch (error) {
         const errors = handleErrors(error);
-        res.status(400).json({errors})
+        res.send({errors})
     }
 })
 //LOGOUT a user by giving him a cookie of same name thats emoty and expires after 2 millisecong
