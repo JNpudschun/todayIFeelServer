@@ -56,7 +56,7 @@ app.get('/',(req,res) => {
 //GET a list of all articles
 app.get("/articles", (req,res)=>{
     try{
-        Article.find({}, (err, data) => res.send(data))
+        Article.find({}, (err, data) => res.send(data)).sort({createdDate: -1})
     }catch(error){
         console.log(error)
         res.send(error)
