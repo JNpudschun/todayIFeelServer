@@ -42,10 +42,10 @@ app.use(function (req, res, next) {
     // // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
     // // Website you wish to allow to connect
-        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     // Pass to next layer of middleware
     next();
-});
+})
 //anchor so something is displayed on root when server is running
 app.get('/',(req,res) => {
     res.send("Server is running and listening to requests.")
