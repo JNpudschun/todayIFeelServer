@@ -23,7 +23,7 @@ const corsOptions ={
     optionSuccessStatus:200
 }
 // app.use(cors());
-// app.use(cors());
+app.use(cors(corsOptions));
 app.use(cookieParser());
 //connecting to database and after that setting app to listen on correct port
 mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
@@ -31,21 +31,21 @@ mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
 .catch((err) => console.log(err));
 
 // Add headers before the routes are defined
-app.use(function (req, res, next) {
-    // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+// app.use(function (req, res, next) {
+//     // Request methods you wish to allow
+//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
-    // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//     // Request headers you wish to allow
+//     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
-    // // Set to true if you need the website to include cookies in the requests sent
-    // // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    // // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-    // Pass to next layer of middleware
-    next();
-})
+//     // // Set to true if you need the website to include cookies in the requests sent
+//     // // to the API (e.g. in case you use sessions)
+//     res.setHeader('Access-Control-Allow-Credentials', true);
+//     // // Website you wish to allow to connect
+//     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+//     // Pass to next layer of middleware
+//     next();
+// })
 //anchor so something is displayed on root when server is running
 app.get('/',(req,res) => {
     res.send("Server is running and listening to requests.")
@@ -75,8 +75,8 @@ app.get("/articles/:_id", (req,res)=>{
 app.post("/articles", (req,res)=>{
     try{
         const newArticle = req.body;
+        console.log(req.body)
         Article.create({
-            // id: newArticle.id,
             title: newArticle.title,
             body: newArticle.body,
             tags: newArticle.tags,
@@ -85,7 +85,7 @@ app.post("/articles", (req,res)=>{
             visible: newArticle.visible,
             createdDate: newArticle.createdDate,    
         }).then(function(newArticles){
-            res.send(newArticles);
+            res.send(newArticles)
         })
     }catch(error){
         console.log(error)
@@ -98,7 +98,6 @@ app.put("/articles/:_id", (req,res) => {
     try{
         const newArticle = req.body;
         Article.updateOne({_id: req.params._id},{$set:{
-            // id: newArticle.id,
             title: newArticle.title,
             body: newArticle.body,
             tags: newArticle.tags,
