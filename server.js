@@ -20,7 +20,7 @@ app.use(express.json())
 
 
 const corsOptions ={
-    origin:'https://todayifeel.netlify.app', 
+    origin:['https://todayifeel.netlify.app','http://localhost:3000'], 
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
