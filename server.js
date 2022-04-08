@@ -230,7 +230,7 @@ app.get("/search/:tags", async (req,res)=>{
                 }
                 const date2 = new Date(dateArray[0]+'-'+dateArray[1]+'-'+dateArray[2]+'T00:00:00')
                 const date3 = new Date(date2 - (3600 * 1000 * 22));                
-                res.cookie('voted',true,{expires:date3,sameSite:"none",secure:true, domain: req.headers.origin})
+                res.cookie('voted',true,{expires:date3,sameSite:"none",secure:true, domain: "https://todayifeel.netlify.app"})
                 res.send(sortedArr)
             }); 
         }
@@ -418,7 +418,7 @@ app.post("/user", async (req,res)=>{
         // console.log(user)
         //create then attach the token to a cookie for the user
         const token = await createToken(user._id);
-        res.cookie('jwt',token,{maxAge:maxAge * 1000,sameSite:"none",secure:true, domain: req.headers.origin})
+        res.cookie('jwt',token,{maxAge:maxAge * 1000,sameSite:"none",secure:true, domain: "https://todayifeel.netlify.app"})
         //respond with created user id and giving the cookie to logged in user in the process
         res.send({ user: user._id });
     } catch (error){
@@ -437,7 +437,7 @@ app.post("/login", async (req, res) => {
         // we can continue by creating the token for the verified user
         const token = await createToken(user._id);
         // return the cookie with the jwt token and the userid
-        res.cookie('jwt',token,{maxAge:maxAge * 1000,sameSite:"none",secure:true, domain: req.headers.origin})
+        res.cookie('jwt',token,{maxAge:maxAge * 1000,sameSite:"none",secure:true, domain: "https://todayifeel.netlify.app"})
         res.send({ user: user._id });
     } catch (error) {
         const errors = handleErrors(error);
@@ -446,7 +446,7 @@ app.post("/login", async (req, res) => {
 })
 //LOGOUT a user by giving him a cookie of same name thats emoty and expires after 2 millisecong
 app.get("/logout", (req,res)=>{
-    res.cookie('jwt','',{maxAge:1,sameSite:"none",secure:true, domain: req.headers.origin})
+    res.cookie('jwt','',{maxAge:1,sameSite:"none",secure:true, domain: "https://todayifeel.netlify.app"})
     res.send("User successfully logged out")
 })
 //VERIFY the Token of user trying to access a route that has accescontrol on it
