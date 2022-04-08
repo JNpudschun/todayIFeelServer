@@ -131,6 +131,26 @@ app.post("/articles", (req,res)=>{
 app.put("/articles/:_id", (req,res) => {
     try{
         const newArticle = req.body;
+        for(let i = 0;i< newArticle.tags.length;i++){
+            console.log(newArticle.tags[i])
+            Tag.exists({name:newArticle.tags[i]},(error, result)=>{
+                // console.log(JSON.stringify(result).length)
+                if (error){
+                    console.log(error)
+                } else {
+                    console.log(result)
+                    //ObjectId gets retuned or an empty object and 
+                    //the stringyfied version of the Object has a lengt of 4
+                    //so we check this way if there is a returned Id
+                    if(JSON.stringify(result).length < 5){
+                        
+                        //cretate the new Tag and send it back as a response
+                        Tag.create({
+                                    name:newArticle.tags[i],
+                                })
+                    }          
+                }
+        })}
         Article.updateOne({_id: req.params._id},{$set:{
             title: newArticle.title,
             body: newArticle.body,
@@ -140,6 +160,7 @@ app.put("/articles/:_id", (req,res) => {
             visible: newArticle.visible,
             updatedDate: Date.now(),   
         }}).then(function(newArticles){
+            console.log(newArticles)
             res.send(newArticles);})
     }catch(error){
         console.log(error)
