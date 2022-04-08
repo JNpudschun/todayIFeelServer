@@ -30,35 +30,6 @@ app.use(cookieParser());
 mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
     console.warn(`App listening on http://localhost:${PORT}`);}))
 .catch((err) => console.log(err));
-// app.use((req, res, next) => {
-//     const corsWhitelist = [
-//         'http://localhost:3000',
-//         'https://todayifeel.netlify.app/'
-//     ];
-//     if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
-//         res.header('Access-Control-Allow-Origin', req.headers.origin);
-//         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-//         res.setHeader('Access-Control-Allow-Credentials', true);
-//     }
-
-//     next();
-// });
-// Add headers before the routes are defined
-// app.use(function (req, res, next) {
-//     // Request methods you wish to allow
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-//     // Request headers you wish to allow
-//     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
-//     // // Set to true if you need the website to include cookies in the requests sent
-//     // // to the API (e.g. in case you use sessions)
-//     res.setHeader('Access-Control-Allow-Credentials', true);
-//     // // Website you wish to allow to connect
-//     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-//     // Pass to next layer of middleware
-//     next();
-// })
 //anchor so something is displayed on root when server is running
 app.get('/',(req,res) => {
     res.send("Server is running and listening to requests.")
@@ -259,7 +230,7 @@ app.get("/search/:tags", async (req,res)=>{
                 }
                 const date2 = new Date(dateArray[0]+'-'+dateArray[1]+'-'+dateArray[2]+'T00:00:00')
                 const date3 = new Date(date2 - (3600 * 1000 * 22));                
-                res.cookie('voted',true,{expires:date3,sameSite:"none",secure:true})
+                res.cookie('voted',true,{expires:date3,sameSite:"none",secure:true, domain: req.headers.origin})
                 res.send(sortedArr)
             }); 
         }
@@ -447,7 +418,7 @@ app.post("/user", async (req,res)=>{
         // console.log(user)
         //create then attach the token to a cookie for the user
         const token = await createToken(user._id);
-        res.cookie('jwt',token,{maxAge:maxAge * 1000,sameSite:"none",secure:true})
+        res.cookie('jwt',token,{maxAge:maxAge * 1000,sameSite:"none",secure:true, domain: req.headers.origin})
         //respond with created user id and giving the cookie to logged in user in the process
         res.send({ user: user._id });
     } catch (error){
@@ -466,7 +437,7 @@ app.post("/login", async (req, res) => {
         // we can continue by creating the token for the verified user
         const token = await createToken(user._id);
         // return the cookie with the jwt token and the userid
-        res.cookie('jwt',token,{maxAge:maxAge * 1000,sameSite:"none",secure:true})
+        res.cookie('jwt',token,{maxAge:maxAge * 1000,sameSite:"none",secure:true, domain: req.headers.origin})
         res.send({ user: user._id });
     } catch (error) {
         const errors = handleErrors(error);
@@ -475,7 +446,7 @@ app.post("/login", async (req, res) => {
 })
 //LOGOUT a user by giving him a cookie of same name thats emoty and expires after 2 millisecong
 app.get("/logout", (req,res)=>{
-    res.cookie('jwt','',{maxAge:1,sameSite:"none",secure:true})
+    res.cookie('jwt','',{maxAge:1,sameSite:"none",secure:true, domain: req.headers.origin})
     res.send("User successfully logged out")
 })
 //VERIFY the Token of user trying to access a route that has accescontrol on it
