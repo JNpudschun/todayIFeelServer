@@ -20,29 +20,29 @@ app.use(express.json())
 
 
 const corsOptions ={
-    // origin:'http://localhost:3000', 
-    // credentials:true,            //access-control-allow-credentials:true
+    origin:'https://todayifeel.netlify.app/', 
+    credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(cookieParser());
-//connecting to database and after that setting app to listen on correct port
+// connecting to database and after that setting app to listen on correct port
 mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
     console.warn(`App listening on http://localhost:${PORT}`);}))
 .catch((err) => console.log(err));
-app.use((req, res, next) => {
-    const corsWhitelist = [
-        'http://localhost:3000',
-        'https://todayifeel.netlify.app/'
-    ];
-    if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
-        res.header('Access-Control-Allow-Origin', req.headers.origin);
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        res.setHeader('Access-Control-Allow-Credentials', true);
-    }
+// app.use((req, res, next) => {
+//     const corsWhitelist = [
+//         'http://localhost:3000',
+//         'https://todayifeel.netlify.app/'
+//     ];
+//     if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
+//         res.header('Access-Control-Allow-Origin', req.headers.origin);
+//         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//         res.setHeader('Access-Control-Allow-Credentials', true);
+//     }
 
-    next();
-});
+//     next();
+// });
 // Add headers before the routes are defined
 // app.use(function (req, res, next) {
 //     // Request methods you wish to allow
