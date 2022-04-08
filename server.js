@@ -17,6 +17,8 @@ const app = express()
 const PORT = process.env.PORT || 3010;
 //setting up the app to use neccesary middleware
 app.use(express.json())
+
+
 const corsOptions ={
     origin:'http://localhost:3000', 
     credentials:true,            //access-control-allow-credentials:true
@@ -29,7 +31,18 @@ app.use(cookieParser());
 mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
     console.warn(`App listening on http://localhost:${PORT}`);}))
 .catch((err) => console.log(err));
+app.use((req, res, next) => {
+    const corsWhitelist = [
+        'http://localhost:3000',
+        'https://todayifeel.netlify.app/'
+    ];
+    if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
+        res.header('Access-Control-Allow-Origin', req.headers.origin);
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    }
 
+    next();
+});
 // Add headers before the routes are defined
 // app.use(function (req, res, next) {
 //     // Request methods you wish to allow
@@ -85,6 +98,27 @@ app.post("/articles", (req,res)=>{
             visible: newArticle.visible,
             createdDate: newArticle.createdDate,    
         }).then(function(newArticles){
+            for(let i = 0;i< newArticles.tags.length;i++){
+                console.log(newArticles.tags[i])
+                Tag.exists({name:newArticles.tags[i]},(error, result)=>{
+                    // console.log(JSON.stringify(result).length)
+                    if (error){
+                        console.log(error)
+                    } else {
+                        console.log(result)
+                        //ObjectId gets retuned or an empty object and 
+                        //the stringyfied version of the Object has a lengt of 4
+                        //so we check this way if there is a returned Id
+                        if(JSON.stringify(result).length < 5){
+                            
+                            //cretate the new Tag and send it back as a response
+                            Tag.create({
+                                        name:newArticles.tags[i],
+                                    })
+                        }          
+                    }
+                })
+            }
             res.send(newArticles)
         })
     }catch(error){
