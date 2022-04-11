@@ -524,10 +524,10 @@ app.post("/send", function (req, res) {
     let mailOptions = {
       from: `${req.body.mailerState.email}`,
       to: process.env.EMAIL,
-      subject: `Today I Feel – article was reported ${req.body.mailerState.article.title}`,
+      subject: `Today I Feel – article "${req.body.mailerState.article.title}" was reported`,
       html: `<h4>Reason: ${req.body.mailerState.value}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
-    console.log({reason:req.body.mailerState.value,comment:req.body.mailerState.message,article:req.body.mailerState.article});
+    // console.log({reason:req.body.mailerState.value,comment:req.body.mailerState.message,article:req.body.mailerState.article});
     Report.create({reason:req.body.mailerState.value,comment:req.body.mailerState.message,article:req.body.mailerState.article})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
