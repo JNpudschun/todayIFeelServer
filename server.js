@@ -125,7 +125,7 @@ app.put("/articles/:_id", (req,res) => {
                 }
         })}
         console.log(newArticle)
-        Article.updateOne({_id: req.params._id},{$set:{
+        Article.findOneAndUpdate({_id: req.params._id},{$set:{
             title: newArticle.title,
             body: newArticle.body,
             tags: newArticle.tags,
@@ -133,7 +133,8 @@ app.put("/articles/:_id", (req,res) => {
             ext: newArticle.ext,
             visible: newArticle.visible,
             updatedDate: Date.now(),   
-        }}).then(function(newArticles){
+        }},
+        {new: true}).then(function(newArticles){
             console.log(newArticles)
             res.send(newArticles);})
     }catch(error){
