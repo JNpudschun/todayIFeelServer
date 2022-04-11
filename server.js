@@ -5,11 +5,13 @@ const config = require("dotenv")
 const jwt = require("jsonwebtoken")
 const cookieParser = require("cookie-parser")
 const cors = require('cors');
+const nodemailer = require("nodemailer"); 
 //importing Schema and Dtabasemodels
 const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
 const User = require("./model/userModel")
-const ExpDate = require("./model/dateModel")
+const ExpDate = require("./model/dateModel");
+const Report = require("./model/reportModel")
 //creating needed variables
 config.config();
 const mongoDB = process.env.DB_CONNECT;
@@ -157,7 +159,7 @@ app.get("/search/:tags", async (req,res)=>{
         let indicator = tagArr.shift();
         console.log(indicator,tagArr,req.cookies.voted)
         if(indicator === "vote" && req.cookies.voted){
-            // res.cookie('voted',false,{maxAge:1})
+            res.cookie('voted',false,{maxAge:1})
             res.send("You already voted today please use the searchfunction or try again after 0:00GMT")
         }else if(indicator === "vote" && !req.cookies.voted ){
             //looks for all articles tha have tag thats inside the tagArr
@@ -216,20 +218,21 @@ app.get("/search/:tags", async (req,res)=>{
                         }
                     })   
                 }
-                let date = new Date(Date.now() + (3600 * 1000 * 24))
+                let date = new Date(Date.now() + (3600 * 1000 * 48))
+                console.log(date)
                 let dateArray = [date.getFullYear(),date.getMonth(),date.getDate()]
-                if(dateArray[1] < 9){
+                console.log(dateArray)
+                if(dateArray[1] < 10){
                     dateArray[1] = '0'+ (dateArray[1]+1);
-                } else if(dateArray[1] === 9){
-                    dateArray[1] += 1;
-                }
-                if(dateArray[2] < 9){
-                    dateArray[2] = '0'+ (dateArray[2]+1);
-                } else if(dateArray[2] === 9){
-                    dateArray[2] += 1;
-                }
+                } 
+                if(dateArray[2] < 10){
+                    dateArray[2] = '0'+ (dateArray[2]);
+                } 
+                console.log(dateArray)
                 const date2 = new Date(dateArray[0]+'-'+dateArray[1]+'-'+dateArray[2]+'T00:00:00')
-                const date3 = new Date(date2 - (3600 * 1000 * 22));                
+                console.log(date2)
+                const date3 = new Date(date2 - (3600 * 1000 * 22));  
+                console.log(date3)              
                 res.cookie('voted',true,{expires:date3,sameSite:"none",secure:true})
                 res.send(sortedArr)
             }); 
@@ -464,10 +467,83 @@ app.get("/verify", (req,res)=>{
             }
         });
     } else {
-        //Return a diffrent string if user is not verified
+        //Return a different string if user is not verified
         res.send("Not verified")
     }
 })
+let transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      type: "OAuth2",
+      user: process.env.EMAIL,
+      pass: process.env.WORD,
+      clientId: process.env.OAUTH_CLIENTID,
+      clientSecret: process.env.OAUTH_CLIENT_SECRET,
+      refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+    },
+   });
+transporter.verify((err, success) => {
+err
+    ? console.log(err)
+    : console.log(`=== Server is ready to take messages: ${success} ===`);
+});
+app.get("/reports",(req,res)=>{
+    try{
+        Report.find({}, (err, data) => res.send(data));
+    }catch(error){
+        console.log(error)
+        res.send(error)
+    }
+})
+app.get("/reports/:_id",(req,res)=>{
+    try{
+        Report.find({_id: req.params._id}, (err, data) => res.send(data));
+    }catch(error){
+        console.log(error)
+        res.send(error)
+    } 
+})
+app.delete("/reports/:_id",(req,res)=>{
+    try{
+        Report.deleteOne({ _id: req.params._id }).then(function () {
+        res.end();
+    });
+    } catch(error){
+        res.send(error)
+    }
+    
+})
+app.post("/send", function (req, res) {
+    console.log(req.body)
+    // let mailOptions = {
+    //     from: "test@gmail.com",
+    //     to: process.env.EMAIL,
+    //     subject: "Nodemailer API",
+    //     text: "Hi from your nodemailer API",
+    //   };
+    let mailOptions = {
+      from: `${req.body.mailerState.email}`,
+      to: process.env.EMAIL,
+      subject: `Today I Feel – article was reported ${req.body.mailerState.article.title}`,
+      html: `<h4>Reason: ${req.body.mailerState.value}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
+    };
+    console.log({reason:req.body.mailerState.value,comment:req.body.mailerState.message,article:req.body.mailerState.article});
+    Report.create({reason:req.body.mailerState.value,comment:req.body.mailerState.message,article:req.body.mailerState.article})
+    transporter.sendMail(mailOptions, function (err, data) {
+      if (err) {
+        res.json({
+            status: "Fail",
+        })
+      } else {
+        console.log("== Message sent ==");
+        res.json({ status: "success" });
+      }
+    });
+   });
+
+
+
+
 function setExpDate(){
     ExpDate.find({key: 1}).then(result =>{
         weeklyExpirationDate = result[0];
