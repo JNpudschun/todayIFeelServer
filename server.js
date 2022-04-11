@@ -504,6 +504,20 @@ app.get("/reports/:_id",(req,res)=>{
         res.send(error)
     } 
 })
+app.put("/reports/:_id", (req,res)=>{
+    try{
+        let newReport = req.body;
+        Report.updateOne({ _id: req.params._id },{$set:{
+            reason: newReport.report,
+            comment: newReport.comment,
+            article: newReport.article   
+        }}).then(function () {
+        res.end();
+    });
+    } catch(error){
+        res.send(error)
+    } 
+})
 app.delete("/reports/:_id",(req,res)=>{
     try{
         Report.deleteOne({ _id: req.params._id }).then(function () {
