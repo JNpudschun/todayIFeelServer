@@ -111,7 +111,7 @@ app.put("/articles/:_id", (req,res) => {
                 if (error){
                     console.log(error)
                 } else {
-                    console.log("Exists Return: " + result)
+                    // console.log("Exists Return: " + result)
                     //ObjectId gets retuned or an empty object and 
                     //the stringyfied version of the Object has a lengt of 4
                     //so we check this way if there is a returned Id
@@ -124,6 +124,7 @@ app.put("/articles/:_id", (req,res) => {
                     }          
                 }
         })}
+        console.log(newArticle)
         Article.updateOne({_id: req.params._id},{$set:{
             title: newArticle.title,
             body: newArticle.body,
@@ -133,7 +134,7 @@ app.put("/articles/:_id", (req,res) => {
             visible: newArticle.visible,
             updatedDate: Date.now(),   
         }}).then(function(newArticles){
-            console.log("Log update finished" + newArticles)
+            console.log(newArticles)
             res.send(newArticles);})
     }catch(error){
         console.log(error)
