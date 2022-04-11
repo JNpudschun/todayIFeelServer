@@ -105,13 +105,13 @@ app.put("/articles/:_id", (req,res) => {
     try{
         const newArticle = req.body;
         for(let i = 0;i< newArticle.tags.length;i++){
-            console.log(newArticle.tags[i])
+            // console.log(newArticle.tags[i])
             Tag.exists({name:newArticle.tags[i]},(error, result)=>{
                 // console.log(JSON.stringify(result).length)
                 if (error){
                     console.log(error)
                 } else {
-                    console.log(result)
+                    console.log("Exists Return: " + result)
                     //ObjectId gets retuned or an empty object and 
                     //the stringyfied version of the Object has a lengt of 4
                     //so we check this way if there is a returned Id
@@ -133,7 +133,7 @@ app.put("/articles/:_id", (req,res) => {
             visible: newArticle.visible,
             updatedDate: Date.now(),   
         }}).then(function(newArticles){
-            console.log(newArticles)
+            console.log("Log update finished" + newArticles)
             res.send(newArticles);})
     }catch(error){
         console.log(error)
