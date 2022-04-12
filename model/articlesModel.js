@@ -8,8 +8,8 @@ const articleSchema = new Schema({
   url: { type:String, default:"/" },
   ext: { type:Boolean, required: true, default: false },
   visible: { type:Boolean, required: true, default: true },
-  reportReason: { type:String, default:"/" },
-  reportComment: { type:String, default:"/" },
+  reportReason: { type:Array, default:[] },
+  reportComment: { type:Array, default:[] },
   createdDate: { type: Date, default: Date.now },
   updatedDate: { type: Date, default: Date.now },
 });

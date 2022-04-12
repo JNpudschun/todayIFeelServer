@@ -502,7 +502,7 @@ app.post("/send", function (req, res) {
       html: `<h4>Reason: ${req.body.mailerState.article.reportReason}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
     console.log(mailOptions);
-    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$set:{reportReason:req.body.mailerState.article.reportReason,reportComment:req.body.mailerState.message}}).then((response)=>{console.log(response)})
+    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$push:{reportReason:[req.body.mailerState.article.reportReason],reportComment:[req.body.mailerState.message]}}).then((response)=>{console.log(response)})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
         res.json({
