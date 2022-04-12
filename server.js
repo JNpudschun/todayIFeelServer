@@ -501,9 +501,7 @@ app.post("/send", function (req, res) {
       html: `<h4>Reason: ${req.body.mailerState.value}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
     // console.log(mailOptions);
-    let id = new mongoose.Types.ObjectId();
-    console.log(id)
-    Article.findOneAndUpdate({_id:req.body.mailerState.articleId},{$push:{_id:id,reports:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}}).then((response)=>{console.log(response)})
+    Article.findOneAndUpdate({_id:req.body.mailerState.articleId},{$push:{reports:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}}).then((response)=>{console.log(response)})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
         res.json({
