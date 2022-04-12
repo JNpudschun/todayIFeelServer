@@ -491,7 +491,7 @@ err
     ? console.log(err)
     : console.log(`=== Server is ready to take messages: ${success} ===`);
 });
-app.delete("/report")
+// app.delete("/report")
 app.post("/send", function (req, res) {
     // console.log(req.body)
     let mailOptions = {
