@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken")
 const cookieParser = require("cookie-parser")
 const cors = require('cors');
 const nodemailer = require("nodemailer"); 
+// const ObjectID = require('mongodb').ObjectId;
 //importing Schema and Dtabasemodels
 const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
@@ -500,7 +501,7 @@ app.post("/send", function (req, res) {
       html: `<h4>Reason: ${req.body.mailerState.value}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
     console.log(mailOptions);
-    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$push:{id:new ObjectID(),reports:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}}).then((response)=>{console.log(response)})
+    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$push:{id:new mongoose.Types.ObjectId(),reports:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}}).then((response)=>{console.log(response)})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
         res.json({
