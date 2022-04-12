@@ -548,7 +548,7 @@ app.post("/send", function (req, res) {
       html: `<h4>Reason: ${req.body.mailerState.value}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
     // console.log({reason:req.body.mailerState.value,comment:req.body.mailerState.message,article:req.body.mailerState.article});
-    Report.create({reason:req.body.mailerState.value,comment:req.body.mailerState.message,article:req.body.mailerState.article})
+    Article.updateOne({_id:req.body.mailerState.article._id},{$set:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
         res.json({
