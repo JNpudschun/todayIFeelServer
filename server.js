@@ -535,20 +535,14 @@ err
 // })
 app.post("/send", function (req, res) {
     console.log(req.body)
-    // let mailOptions = {
-    //     from: "test@gmail.com",
-    //     to: process.env.EMAIL,
-    //     subject: "Nodemailer API",
-    //     text: "Hi from your nodemailer API",
-    //   };
     let mailOptions = {
       from: `${req.body.mailerState.email}`,
       to: process.env.EMAIL,
       subject: `Today I Feel – article "${req.body.mailerState.article.title}" was reported`,
       html: `<h4>Reason: ${req.body.mailerState.value}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
-    // console.log({reason:req.body.mailerState.value,comment:req.body.mailerState.message,article:req.body.mailerState.article});
-    Article.updateOne({_id:req.body.mailerState.article._id},{$set:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}})
+    console.log(mailOptions);
+    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$set:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}).then((response)=>{console.log(response)})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
         res.json({
