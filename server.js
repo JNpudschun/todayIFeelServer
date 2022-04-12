@@ -497,13 +497,13 @@ app.post("/send", function (req, res) {
     let mailOptions = {
       from: `${req.body.mailerState.email}`,
       to: process.env.EMAIL,
-      subject: `Today I Feel – article "${req.body.mailerState.article.title}" was reported`,
+      subject: `Today I Feel – article "${req.body.mailerState.articleTitle}" was reported`,
       html: `<h4>Reason: ${req.body.mailerState.value}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
     // console.log(mailOptions);
     let id = new mongoose.Types.ObjectId();
     console.log(id)
-    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$push:{id:id,reports:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}}).then((response)=>{console.log(response)})
+    Article.findOneAndUpdate({_id:req.body.mailerState.articleId},{$push:{id:id,reports:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}}).then((response)=>{console.log(response)})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
         res.json({
