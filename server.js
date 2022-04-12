@@ -11,7 +11,7 @@ const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
 const User = require("./model/userModel")
 const ExpDate = require("./model/dateModel");
-const Report = require("./model/reportModel")
+// const Report = require("./model/reportModel")
 //creating needed variables
 config.config();
 const mongoDB = process.env.DB_CONNECT;
@@ -69,6 +69,8 @@ app.post("/articles", (req,res)=>{
             url: newArticle.url,
             ext: newArticle.ext,
             visible: newArticle.visible,
+            reportReason: newArticle.reportReason,
+            reportComment: newArticle.reportComment,
             createdDate: newArticle.createdDate,    
         }).then(function(newArticles){
             for(let i = 0;i< newArticles.tags.length;i++){
@@ -132,6 +134,8 @@ app.put("/articles/:_id", (req,res) => {
             url: newArticle.url,
             ext: newArticle.ext,
             visible: newArticle.visible,
+            reportReason: newArticle.reportReason,
+            reportComment: newArticle.reportComment,
             updatedDate: Date.now(),   
         }},
         {new: true}).then(function(newArticles){
@@ -489,46 +493,46 @@ err
     ? console.log(err)
     : console.log(`=== Server is ready to take messages: ${success} ===`);
 });
-app.get("/reports",(req,res)=>{
-    try{
-        Report.find({}, (err, data) => res.send(data));
-    }catch(error){
-        console.log(error)
-        res.send(error)
-    }
-})
-app.get("/reports/:_id",(req,res)=>{
-    try{
-        Report.find({_id: req.params._id}, (err, data) => res.send(data));
-    }catch(error){
-        console.log(error)
-        res.send(error)
-    } 
-})
-app.put("/reports/:_id", (req,res)=>{
-    try{
-        let newReport = req.body;
-        Report.updateOne({ _id: req.params._id },{$set:{
-            reason: newReport.report,
-            comment: newReport.comment,
-            article: newReport.article   
-        }}).then(function () {
-        res.end();
-    });
-    } catch(error){
-        res.send(error)
-    } 
-})
-app.delete("/reports/:_id",(req,res)=>{
-    try{
-        Report.deleteOne({ _id: req.params._id }).then(function () {
-        res.end();
-    });
-    } catch(error){
-        res.send(error)
-    }
+// app.get("/reports",(req,res)=>{
+//     try{
+//         Report.find({}, (err, data) => res.send(data));
+//     }catch(error){
+//         console.log(error)
+//         res.send(error)
+//     }
+// })
+// app.get("/reports/:_id",(req,res)=>{
+//     try{
+//         Report.find({_id: req.params._id}, (err, data) => res.send(data));
+//     }catch(error){
+//         console.log(error)
+//         res.send(error)
+//     } 
+// })
+// app.put("/reports/:_id", (req,res)=>{
+//     try{
+//         let newReport = req.body;
+//         Report.updateOne({ _id: req.params._id },{$set:{
+//             reason: newReport.report,
+//             comment: newReport.comment,
+//             article: newReport.article   
+//         }}).then(function () {
+//         res.end();
+//     });
+//     } catch(error){
+//         res.send(error)
+//     } 
+// })
+// app.delete("/reports/:_id",(req,res)=>{
+//     try{
+//         Report.deleteOne({ _id: req.params._id }).then(function () {
+//         res.end();
+//     });
+//     } catch(error){
+//         res.send(error)
+//     }
     
-})
+// })
 app.post("/send", function (req, res) {
     console.log(req.body)
     // let mailOptions = {
