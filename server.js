@@ -11,7 +11,6 @@ const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
 const User = require("./model/userModel")
 const ExpDate = require("./model/dateModel");
-// const Report = require("./model/reportModel")
 //creating needed variables
 config.config();
 const mongoDB = process.env.DB_CONNECT;
@@ -493,46 +492,7 @@ err
     ? console.log(err)
     : console.log(`=== Server is ready to take messages: ${success} ===`);
 });
-// app.get("/reports",(req,res)=>{
-//     try{
-//         Report.find({}, (err, data) => res.send(data));
-//     }catch(error){
-//         console.log(error)
-//         res.send(error)
-//     }
-// })
-// app.get("/reports/:_id",(req,res)=>{
-//     try{
-//         Report.find({_id: req.params._id}, (err, data) => res.send(data));
-//     }catch(error){
-//         console.log(error)
-//         res.send(error)
-//     } 
-// })
-// app.put("/reports/:_id", (req,res)=>{
-//     try{
-//         let newReport = req.body;
-//         Report.updateOne({ _id: req.params._id },{$set:{
-//             reason: newReport.report,
-//             comment: newReport.comment,
-//             article: newReport.article   
-//         }}).then(function () {
-//         res.end();
-//     });
-//     } catch(error){
-//         res.send(error)
-//     } 
-// })
-// app.delete("/reports/:_id",(req,res)=>{
-//     try{
-//         Report.deleteOne({ _id: req.params._id }).then(function () {
-//         res.end();
-//     });
-//     } catch(error){
-//         res.send(error)
-//     }
-    
-// })
+
 app.post("/send", function (req, res) {
     console.log(req.body)
     let mailOptions = {
@@ -542,7 +502,7 @@ app.post("/send", function (req, res) {
       html: `<h4>Reason: ${req.body.mailerState.article.reportReason}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
     console.log(mailOptions);
-    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$set:{reportReason:req.body.mailerState.article.reportReason,reportComment:req.body.mailerState.article.reportComment}}).then((response)=>{console.log(response)})
+    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$set:{reportReason:req.body.mailerState.article.reportReason,reportComment:req.body.mailerState.message}}).then((response)=>{console.log(response)})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
         res.json({
