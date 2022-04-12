@@ -68,8 +68,7 @@ app.post("/articles", (req,res)=>{
             url: newArticle.url,
             ext: newArticle.ext,
             visible: newArticle.visible,
-            reportReason: newArticle.reportReason,
-            reportComment: newArticle.reportComment,
+            reports: newArticle.reports,
             createdDate: newArticle.createdDate,    
         }).then(function(newArticles){
             for(let i = 0;i< newArticles.tags.length;i++){
@@ -133,8 +132,7 @@ app.put("/articles/:_id", (req,res) => {
             url: newArticle.url,
             ext: newArticle.ext,
             visible: newArticle.visible,
-            reportReason: newArticle.reportReason,
-            reportComment: newArticle.reportComment,
+            reports: newArticle.reports,
             updatedDate: Date.now(),   
         }},
         {new: true}).then(function(newArticles){
@@ -492,7 +490,7 @@ err
     ? console.log(err)
     : console.log(`=== Server is ready to take messages: ${success} ===`);
 });
-
+app.delete("/report")
 app.post("/send", function (req, res) {
     console.log(req.body)
     let mailOptions = {
@@ -502,7 +500,7 @@ app.post("/send", function (req, res) {
       html: `<h4>Reason: ${req.body.mailerState.value}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
     console.log(mailOptions);
-    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$push:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}).then((response)=>{console.log(response)})
+    Article.findOneAndUpdate({_id:req.body.mailerState.article._id},{$push:{id:new ObjectID(),reports:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}}).then((response)=>{console.log(response)})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
         res.json({
