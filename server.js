@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken")
 const cookieParser = require("cookie-parser")
 const cors = require('cors');
 const nodemailer = require("nodemailer"); 
-// const ObjectID = require('mongodb').ObjectId;
 //importing Schema and Dtabasemodels
 const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
@@ -19,8 +18,6 @@ const app = express()
 const PORT = process.env.PORT || 3010;
 //setting up the app to use neccesary middleware
 app.use(express.json())
-
-
 const corsOptions ={
     origin:['https://todayifeel.netlify.app','http://localhost:3000'], 
     credentials:true,            //access-control-allow-credentials:true
@@ -61,7 +58,6 @@ app.get("/articles/:_id", (req,res)=>{
 app.post("/articles", (req,res)=>{
     try{
         const newArticle = req.body;
-        console.log(req.body)
         Article.create({
             title: newArticle.title,
             body: newArticle.body,
@@ -73,18 +69,14 @@ app.post("/articles", (req,res)=>{
             createdDate: newArticle.createdDate,    
         }).then(function(newArticles){
             for(let i = 0;i< newArticles.tags.length;i++){
-                console.log(newArticles.tags[i])
                 Tag.exists({name:newArticles.tags[i]},(error, result)=>{
-                    // console.log(JSON.stringify(result).length)
                     if (error){
                         console.log(error)
                     } else {
-                        console.log(result)
                         //ObjectId gets retuned or an empty object and 
                         //the stringyfied version of the Object has a lengt of 4
                         //so we check this way if there is a returned Id
                         if(JSON.stringify(result).length < 5){
-                            
                             //cretate the new Tag and send it back as a response
                             Tag.create({
                                         name:newArticles.tags[i],
@@ -106,18 +98,14 @@ app.put("/articles/:_id", (req,res) => {
     try{
         const newArticle = req.body;
         for(let i = 0;i< newArticle.tags.length;i++){
-            // console.log(newArticle.tags[i])
             Tag.exists({name:newArticle.tags[i]},(error, result)=>{
-                // console.log(JSON.stringify(result).length)
                 if (error){
                     console.log(error)
                 } else {
-                    // console.log("Exists Return: " + result)
                     //ObjectId gets retuned or an empty object and 
                     //the stringyfied version of the Object has a lengt of 4
                     //so we check this way if there is a returned Id
                     if(JSON.stringify(result).length < 5){
-                        
                         //cretate the new Tag and send it back as a response
                         Tag.create({
                                     name:newArticle.tags[i],
@@ -125,7 +113,6 @@ app.put("/articles/:_id", (req,res) => {
                     }          
                 }
         })}
-        console.log(newArticle)
         Article.findOneAndUpdate({_id: req.params._id},{$set:{
             title: newArticle.title,
             body: newArticle.body,
@@ -161,7 +148,6 @@ app.get("/search/:tags", async (req,res)=>{
         //split params into an arry for easyer database querying
         let tagArr = req.params.tags.split(",");
         let indicator = tagArr.shift();
-        console.log(indicator,tagArr,req.cookies.voted)
         if(indicator === "vote" && req.cookies.voted){
             res.cookie('voted',false,{maxAge:1})
             res.send("You already voted today please use the searchfunction or try again after 0:00GMT")
@@ -223,20 +209,15 @@ app.get("/search/:tags", async (req,res)=>{
                     })   
                 }
                 let date = new Date(Date.now() + (3600 * 1000 * 48))
-                console.log(date)
                 let dateArray = [date.getFullYear(),date.getMonth(),date.getDate()]
-                console.log(dateArray)
                 if(dateArray[1] < 10){
                     dateArray[1] = '0'+ (dateArray[1]+1);
                 } 
                 if(dateArray[2] < 10){
                     dateArray[2] = '0'+ (dateArray[2]);
                 } 
-                console.log(dateArray)
                 const date2 = new Date(dateArray[0]+'-'+dateArray[1]+'-'+dateArray[2]+'T00:00:00')
-                console.log(date2)
-                const date3 = new Date(date2 - (3600 * 1000 * 22));  
-                console.log(date3)              
+                const date3 = new Date(date2 - (3600 * 1000 * 22));           
                 res.cookie('voted',true,{expires:date3,sameSite:"none",secure:true})
                 res.send(sortedArr)
             }); 
@@ -270,8 +251,7 @@ app.get("/search/:tags", async (req,res)=>{
                 // console.log(sortedArr)
                 res.send(sortedArr)
             });             
-        }
-        
+        }   
     }catch(error){
         console.log(error)
         res.send(error)
@@ -315,7 +295,6 @@ app.post("/tags", (req,res)=>{
                 //the stringyfied version of the Object has a lengt of 4
                 //so we check this way if there is a returned Id
                 if(JSON.stringify(result).length < 5){
-                    
                     //cretate the new Tag and send it back as a response
                     Tag.create({
                                 name:newTag.name,
@@ -353,7 +332,6 @@ app.delete("/tags/:name", (req,res)=>{
 
 //function to handle indiviual errors on login and return pecific error messages
 function handleErrors(err){
-    console.log(err.message, err.code)
     let errors = { email:'',password:''}
     // incorrect email
     if (err.message === 'incorrect email') {
@@ -422,7 +400,6 @@ app.post("/user", async (req,res)=>{
             email: newUser.email,
             password: newUser.password
         })
-        // console.log(user)
         //create then attach the token to a cookie for the user
         const token = await createToken(user._id);
         res.cookie('jwt',token,{maxAge:maxAge * 1000,sameSite:"none",secure:true})
@@ -465,7 +442,6 @@ app.get("/verify", (req,res)=>{
             if (err) {
                 res.send(err.message);
             } else {
-                // console.log(decodedToken);
                 //Return certain string if user is verified 
                 res.send("OK")
             }
@@ -491,16 +467,14 @@ err
     ? console.log(err)
     : console.log(`=== Server is ready to take messages: ${success} ===`);
 });
-// app.delete("/report")
+
 app.post("/send", function (req, res) {
-    // console.log(req.body)
     let mailOptions = {
       from: `${req.body.mailerState.email}`,
       to: process.env.EMAIL,
       subject: `Today I Feel – article "${req.body.mailerState.articleTitle}" was reported`,
       html: `<h4>Reason: ${req.body.mailerState.value}</h4> <p>Comment: ${req.body.mailerState.message}</p>`,
     };
-    // console.log(mailOptions);
     Article.findOneAndUpdate({_id:req.body.mailerState.articleId},{$push:{reports:{reportReason:req.body.mailerState.value,reportComment:req.body.mailerState.message}}}).then((response)=>{console.log(response)})
     transporter.sendMail(mailOptions, function (err, data) {
       if (err) {
@@ -514,42 +488,29 @@ app.post("/send", function (req, res) {
     });
    });
 
-
-
-
 function setExpDate(){
     ExpDate.find({key: 1}).then(result =>{
         weeklyExpirationDate = result[0];
-        // console.log(result)
         if(result.length === 0){
             let date = new Date('2022-04-12T00:00:00');
             let date2 =new Date(date - (3600 * 1000 * 22));   
-            console.log(date2.toUTCString(),"Entered Create")
             ExpDate.create({
                 expires: date2
             }).then((date)=> {
                 weeklyExpirationDate = date;
-                console.log(weeklyExpirationDate)
             })
               
         }
-        // weeklyExpirationDate = result;
-        console.log(weeklyExpirationDate)
-    })
-    
+    }) 
 }
 function intervalFunc() {
     if(count === 0){
-        console.log("Entered first load")
         setExpDate();
         count+=1;
     }else{
-        console.log("Entered updatecheck")
         let date = new Date();
-        console.log(date,weeklyExpirationDate.expires,count)
         if(date > weeklyExpirationDate.expires){
             weeklyExpirationDate.expires.setDate(weeklyExpirationDate.expires.getDate()+7)
-            console.log(weeklyExpirationDate)
             Tag.updateMany({},{$set:{weeklyTimesClicked:0}}).then(tag=>console.log(date))
             ExpDate.updateOne({key:1},{$set:{expires:weeklyExpirationDate.expires}}).then(date=>console.log(date))
             count+=1;
