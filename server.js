@@ -1,3 +1,34 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//  authors: Jan Nikas Pudschun, Tanja Karius
+//  date: 14.04.2022
+//  Articles:
+//  get:    /articles       : (line:069) : Get all Articles 
+//  get:    /articles/:_id  : (line:078) : Get a article by id
+//  post:   /articles       : (line:087) : Post a new article
+//  put:    /articles/:_id  : (line:126) : Modify a article, new Tags getcreated
+//  delete: /articles/:_id  : (line:164) : Delete article by id
+//  SearchFunction:
+//  get:    /search/:tags   : (line:175) : Search for articles by tags seperated by comma 
+//                            or vote for said tags then their counter gets increased 
+//                            have to add search or vote before searchtags accordingly
+//  Tags:
+//  get:    /tags           : (line:293) : Get all tags
+//  get:    /tags/:name     : (line:302) : get Tags by value exp: sad or tired ...
+//  post:   /tags           : (line:313) : create new Tag or if existend update clickcounter by 1
+//  delete: /tags/:name     : (line:350) : delete tag by name
+//  Users/authentification:
+//  get:    /user           : (line:394) : Get List of all users
+//  get:    /user/:_id      : (line:403) : get single user by id
+//  post:   /user           : (line:423) : create new user and signup for frontend
+//  delete: /user:_id       : (line:412) : delete a user by id
+//  get:    /login          : (line:443) : Check authentification and create jwt token to send back
+//  get:    /logout         : (line:461) : delete jwt token to log user out 
+//  post:   /verify         : (line:466) : check jwt token to see if user is logged in
+//  Reports:
+//  post:    /send          : (line:500) : Handle nodemailer on reports and adding reports to articles
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 //importing neccessary packages
 const express = require('express')
 const mongoose = require("mongoose");
@@ -6,7 +37,7 @@ const jwt = require("jsonwebtoken")
 const cookieParser = require("cookie-parser")
 const cors = require('cors');
 const nodemailer = require("nodemailer"); 
-//importing Schema and Dtabasemodels
+//importing Schema and Databasemodels
 const Article = require("./model/articlesModel")
 const Tag = require("./model/tagModel")
 const User = require("./model/userModel")
@@ -33,9 +64,7 @@ mongoose.connect(mongoDB).then((result) => app.listen(PORT, () => {
 app.get('/',(req,res) => {
     res.send("Server is running and listening to requests.")
 })
-
 //ARTICLES
-
 //GET a list of all articles
 app.get("/articles", (req,res)=>{
     try{
