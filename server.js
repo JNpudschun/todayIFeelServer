@@ -10,8 +10,8 @@
 //  delete: /articles/:_id  : (line:164) : Delete article by id
 //  SearchFunction:
 //  get:    /search/:tags   : (line:175) : Search for articles by tags seperated by comma 
-//                            or vote for said tags then their counter gets increased 
-//                            have to add search or vote before searchtags accordingly
+//                            or vote for said tags then their counter gets increased. 
+//                            have to add search, or vote, before searchtags accordingly
 //  Tags:
 //  get:    /tags           : (line:293) : Get all tags
 //  get:    /tags/:name     : (line:302) : get Tags by value exp: sad or tired ...
