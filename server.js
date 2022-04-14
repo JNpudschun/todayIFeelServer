@@ -220,7 +220,7 @@ app.get("/search/:tags", async (req,res)=>{
                 const date3 = new Date(date2 - (3600 * 1000 * 22));           
                 res.cookie('voted',true,{expires:date3,sameSite:"none",secure:true})
                 res.send(sortedArr)
-            }); 
+            }).sort({updatedDate: -1}); 
         }
         if(indicator === "search"){
             //looks for all articles tha have tag thats inside the tagArr
@@ -250,7 +250,7 @@ app.get("/search/:tags", async (req,res)=>{
                 let sortedArr = arr3hits.concat(arr2hits).concat(arr1hits)
                 // console.log(sortedArr)
                 res.send(sortedArr)
-            });             
+            }).sort({updatedDate: -1});             
         }   
     }catch(error){
         console.log(error)
