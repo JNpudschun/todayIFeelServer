@@ -489,6 +489,8 @@ let transporter = nodemailer.createTransport({
       clientId: process.env.OAUTH_CLIENTID,
       clientSecret: process.env.OAUTH_CLIENT_SECRET,
       refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+      accessToken: process.env.OAUTH_ACCESS_TOKEN,
+      expires: 1484314697598,
     },
    });
 transporter.verify((err, success) => {
@@ -496,6 +498,13 @@ err
     ? console.log(err)
     : console.log(`=== Server is ready to take messages: ${success} ===`);
 });
+
+transporter.on("token", (token) => {
+    console.log("A new access token was generated");
+    console.log("User: %s", token.user);    
+    console.log("Access Token: %s", token.accessToken);
+    console.log("Expires: %s", new Date(token.expires));
+  });
 
 app.post("/send", function (req, res) {
     let mailOptions = {
